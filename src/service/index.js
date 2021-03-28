@@ -143,3 +143,23 @@ export const answer = (
     }
   })
 }
+
+export const getCheck = jobId => {
+  return service.get(`/answerRecord/result`, {
+    params: {
+      jobId: jobId
+    }
+  })
+}
+
+export const appeal = (
+    ruleDataId,
+    content,
+) => {
+  return service.put(`/appeal/add`, null, {
+    params: {
+      ruleDataId: ruleDataId,
+      content: content
+    }
+  })
+}

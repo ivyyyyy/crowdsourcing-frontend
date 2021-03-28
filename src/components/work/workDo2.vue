@@ -225,26 +225,9 @@ export default {
   font-size: 20px;
   font-weight: bold;
 }
-
-.ruleExp {
-  position: relative;
-  height: 240px;
-}
-.left {
-  position: absolute;
-  top: 50%;
-}
-.right {
-  position: absolute;
-  top: 50%;
-  right: 0;
-}
-.ruleExpContent {
-  padding: 20px 120px;
-}
-.el-rate {
-  margin-top: 30px;
-  font-size: large;
+button.el-carousel__arrow{
+  width: 50px;
+  height: 50px;
 }
 .action {
   margin-top: 60px;

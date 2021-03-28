@@ -6,14 +6,38 @@
         <div class="block">
           <p>您本次的回答情况如下：</p>
           <span>总准确率为：80%</span>
+          <p style="font-size: 0.9em;color: orange">注：您可以点击题目查看做题情况，对于有疑惑的地方还可以申诉哦！</p>
         </div>
         <div class="table">
-
+          <div class="cell" v-for="(item,index) in checkData" :key="index">
+            <div class="qindex">{{index+1}}</div>
+            <div class="answer" @click="checkdata(item.ruleDataId, item.answer)">
+              <i class="el-icon-check" v-if="item.answer == item.goldenAnswer" style="color: green; font-weight: bold; font-size: 1.5em"></i>
+              <i class="el-icon-close" v-if="item.answer != item.goldenAnswer" style="color: red; font-weight: bold; font-size: 1.5em"></i>
+            </div>
+          </div>
         </div>
       </div>
+      <el-dialog title="申诉界面" v-model="dialogVisible">
+        <div>
+          <p>规则：{{rules.content}}</p>
+          <p v-if="rules.goldenAnswer == 'TRUE'">正确答案为：正确</p>
+          <p v-if="rules.goldenAnswer == 'FALSE'">正确答案为：错误</p>
+          <p v-if="answer == 'TRUE'">您的答案为：正确</p>
+          <p v-if="answer == 'FALSE'">您的答案为：错误</p>
+          <p style="text-decoration: underline; color: blue; cursor: pointer" @click="changeIsShow">对这道题有疑问？请点击这里申诉</p>
+          <el-form :model="appeal" v-show="isShow">
+            <el-form-item label="请在这里写下您的疑问">
+              <el-input type="textarea" v-model="appeal"></el-input>
+            </el-form-item>
+            <span class="dialog-footer">
+              <el-button type="primary" @click="dialogFormVisible = false" class="dialog-button">提 交</el-button>
+            </span>
+          </el-form>
+        </div>
+      </el-dialog>
       <div class="action">
-        <el-button type="primary" @click="prevRule">上一题</el-button>
-        <el-button type="primary" @click="nextRule" :disabled="disabled">
+        <el-button type="primary">
           完成
         </el-button>
       </div>
@@ -22,66 +46,48 @@
 </template>
 
 <script>
-import { getRules, qRule } from '@/service'
+import { getCheck, qRule } from '@/service'
 
 export default {
-  name: 'workDo',
+  name: 'check',
 
   async mounted() {
-    this.$refs['indicator'].initiate()
     const jobId = this.$route.params.jobId
-    const ruleIdList = await getRules(jobId)
-    this.ruleIdList = ruleIdList.data.data
-    await this.getCurrentRule()
+    const checkData = await getCheck(jobId)
+    this.checkData = checkData.data.data
   },
   data() {
     return {
-      checkData1: [{
-        1: '×',
-        2: '√',
-        3: '√',
-        4: '√',
-        5: '√',
-        6: '×',
-        7: '√',
-        8: '√',
-        9: '×',
-        10: '√',
-      }],
-      checkData2: [{
-        11: '×',
-        12: '√',
-        13: '√',
-        14: '√',
-        15: '×',
-        16: '×',
-        17: '√',
-        18: '√',
-        19: '×',
-        20: '√',
-      }]
+      dialogVisible: false,
+      checkData: [
+        {ruleDataId: 1, answer: 'TRUE', goldenAnswer: 'TRUE'},
+        {ruleDataId: 2, answer: 'TRUE', goldenAnswer: 'FALSE'},
+        {ruleDataId: 3, answer: 'TRUE', goldenAnswer: 'FALSE'},
+        {ruleDataId: 4, answer: 'TRUE', goldenAnswer: 'FALSE'},
+        {ruleDataId: 5, answer: 'TRUE', goldenAnswer: 'TRUE'},
+      ],
+      rules:{},
+      answer:'',
+      appeal:'',
+      isShow:false,
     }
   },
   methods: {
+    changeIsShow(){
+      this.isShow = !this.isShow
+    },
     async getCurrentRule() {
       const ruleData = await qRule(this.ruleIdList[this.ruleIndex])
       console.log(ruleData.data.data)
     },
-    getRules() {
-      console.log('wait..')
+    async getRules(id) {
+      const ruleData = await qRule(id)
+      this.rules = ruleData.data.data
     },
-    changeButton() {
-      this.disabled = false
-    },
-    prevRule() {
-      if (this.ruleIndex === 0) return
-      this.ruleIndex--
-      this.getCurrentRule()
-    },
-    nextRule() {
-      if (this.ruleIndex === this.ruleIdList.length) return
-      this.ruleIndex++
-      this.getCurrentRule()
+    checkdata(id, answer){
+      this.dialogVisible=true
+      this.getRules(id)
+      this.answer = answer
     }
   }
 }
@@ -134,10 +140,34 @@ export default {
   width: 100%;
   box-sizing: border-box;
   padding: 0 40px;
+  margin-bottom: 20px;
 }
 .table{
-  width: 30px;
-  height: 40px;
+  padding: 0 40px;
+  height: 180px;
+  width: 1000px;
+}
+.cell{
+  width: 70px;
+  height: 90px;
   border: 1px solid #000;
+  text-align: center;
+  float: left;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+.qindex{
+  height: 45px;
+  line-height: 45px;
+  border-bottom: 1px solid #000;
+}
+.answer{
+  height: 45px;
+  line-height: 45px;
+}
+.dialog-button{
+  display: block;
+  margin: 0 auto;
+  text-align: center;
 }
 </style>
